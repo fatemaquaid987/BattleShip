@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html>
+<head> 
+<meta charset=utf-8 /> 
+<title>battleship</title> 
+<body bgcolor="000000"> 
+<style> 
+table {
+  margin-left: auto;
+  margin-right: auto;
+  table-layout: fixed ;
+  width: 20%;
+  
+}
+td {
+  text-align: center;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  background-color: #66ccff;
+  font-size: 12px;
+  
+}
+th{
+	text-align: center;
+  	font-size: 15px;
+  	background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+}
+h2{
+	  text-align: center;
+	  color: rgba(0,180,255,0.8);
+}
+h3{
+	  text-align: center;
+	  color: rgba(255, 0, 0, 0.8);
+}
+p{
+	  text-align: center;
+	  color: rgba(0, 255, 0, 0.8);
+}
+
+</style>  
+</head>
+<body> 
+<h2 id = "header" >BATTLESHIP</h1>
+<h3 id = "highscores"></h3>
+<p id = "score"></p>
+<h3 id = "grid1"></h2>
+<table id="targetsTable" > 
+</table>
+<h3 id = "grid2"></h2>
+<table id="myTable"> 
+</table>
+
+<script>
+//Player objects
+var player1 = {name : "", placement : "", aircraft: new Array(5), battleship : new Array(4), submarine: new Array(3), missList : new Array(), Hitair: new Array(), Hitbattle: new Array(), Hitsub: new Array(), oppHit: new Array(), oppMiss: new Array(), score: 24};
+var player2 = {name : "", placement : "", aircraft : new Array(5), battleship : new Array(4), submarine: new Array(3), missList : new Array(), Hitair: new Array(), Hitbattle: new Array(), Hitsub: new Array(), oppHit: new Array(), oppMiss: new Array(), score: 24};
+
+
+//gets next ASCII char 
+function nextChar(c) {
+   return String.fromCharCode(c.charCodeAt(0) + 1);
+}
+
+//renders the 10x10 grids  with all the hit and miss cells
+function createTable(id, player)
+{
+  var alpha = 'A';
+  var num = 1;
+  var x = document.getElementById(id);
+ for(var r=0;r<11;r++)
+  {
+   var w=x.insertRow(r);
+   if (r == 0)
+   {
+   	//makes header cells
+   	for(var c=0;c<11;c++)
+   	 {
+   	 	var y =  w.insertCell(c);
+   	 	y.outerHTML = "<th></th>";
+   	 	if(c > 0)
+   	 	{
+
+   		x.rows[0].cells[c].innerHTML = alpha;
+   	 	alpha= nextChar(alpha);}
+   	 }
+   }
+   else{
+   	for(var c=0;c<11;c++)  
+    {
+     	var y=  w.insertCell(c);
+     	//header cells
+     	if(c == 0)
+     	{
+     		y.outerHTML = "<th></th>";
+     		x.rows[r].cells[0].innerHTML = num;
+     		num++;
+     	}
+     	else
+     	{
+     		if (r== 10)
+     		{
+     			var r_r = getStr(1, 48).concat(getStr(0,48));
+     		}
+     		else
+     		{var r_r = getStr(r, 48);}
+     		var c_c = getStr(c, 64);
+     		if(id == 'targetsTable')
+     		{
+     			
+     			//if in players any of the hitlists, color red
+     			if ((player.Hitair.includes(c_c.concat(r_r)))||(player.Hitbattle.includes(c_c.concat(r_r)))||(player.Hitsub.includes(c_c.concat(r_r))))
+     			{
+     				changeCellColor(r_r, c_c, "#ff0000", 'targetsTable');
+     			}
+     			//if in miss list, color white
+     			else if(player.missList.includes(c_c.concat(r_r)))
+     			{
+     				changeCellColor(r_r, c_c, "#ffffff", 'targetsTable');
+     			}
+     			
+     			
+     			y.addEventListener("click", clicked);
+     		}
+     		else if(id == 'myTable')
+     		{
+     			//if in players oppmiss list, color white
+     			if(player.oppMiss.includes(c_c.concat(r_r)))
+     			{
+     				changeCellColor(r_r, c_c, "#ffffff", 'myTable');
+     			}
+     			//if in players opphit list, solor red
+     			else if(player.oppHit.includes(c_c.concat(r_r)))
+     			{
+     				changeCellColor(r_r, c_c, "#ff0000", 'myTable');
+     			}
+     			
+     		}
+     	}
+
+    }
+   }
+   
+   }
+
+}
+
+//performs a players turn
+function playturn(p1, p2, c_c, r_r)
+{
+	if (p2.aircraft.includes(c_c.concat(r_r)))
+			{
+				
+				p1.Hitair.push(c_c.concat(r_r)); //append this cell to player1's hitair list
+				p2.oppHit.push(c_c.concat(r_r)); //append to p2's opphit list
+				changeCellColor(r_r, c_c, "#ff0000", 'targetsTable'); //change the color to red
+				p2.score -= 2;
+				alert("It's a Hit!");//send alert
+				if(p1.Hitair.length == 5)
+				{
+					alert(p2.name+ "'s aircraft sunk"); //send alert
+
+
+				}
+				
+
+			}
+			else if (p2.battleship.includes(c_c.concat(r_r)))
+			{
+				
+				p1.Hitbattle.push(c_c.concat(r_r)); //append this cell to player1's hitair list
+				p2.oppHit.push(c_c.concat(r_r)); //append to p2's opphit list
+				changeCellColor(r_r, c_c, "#ff0000", 'targetsTable'); //change the color to red
+				p2.score -= 2;
+				alert("It's a Hit!");
+				if(p1.Hitbattle.length == 4)
+				{
+					alert(p2.name+ "'s battleship sunk");
+				}
+				
+
+			}
+			else if (p2.submarine.includes(c_c.concat(r_r)))
+			{
+				
+				p1.Hitsub.push(c_c.concat(r_r)); //append this cell to player1's hitair list
+				p2.oppHit.push(c_c.concat(r_r)); //append to p2's opphit list
+				changeCellColor(r_r, c_c, "#ff0000", 'targetsTable'); //change the color to red
+				p2.score -= 2;
+				alert("It's a Hit!");
+				if(p1.Hitsub.length == 3)
+				{
+					alert(p2.name+ "'s submarine sunk");
+				}
+				
+
+			}
+			else
+			{
+				p1.missList.push(c_c.concat(r_r));
+				p2.oppMiss.push(c_c.concat(r_r)); //append to p2's oppMiss list
+				alert("Sorry you missed it!");
+				changeCellColor(r_r, c_c, "#ffffff", 'targetsTable');
+			}
+
+}
+
+//detects what cell is clicked by the player
+function clicked() {
+	var c = this.cellIndex;
+	var r = this.parentNode.rowIndex;
+	var c_c = getStr(c, 64); 
+	if( r == 10)
+	{
+		var r_r = getStr(1, 48).concat(getStr(0,48));
+	}
+	else
+	{
+		var r_r = getStr(r, 48);
+	}
+	if (turn == 1)
+	{
+		//player 1's turn
+		playturn(player1, player2, c_c, r_r);
+		setTimeout(function() {
+			removeFunc();
+		}, 300)
+		setTimeout(function() {
+			if(win == false)
+  			{alert("Click OK to begin "+ player2.name+"'s turn");
+  			turn =3;}
+  		},1000)
+
+			
+		
+	}
+	else if(turn == 2)
+	{
+		//player 2's turn
+		playturn(player2, player1, c_c, r_r);
+		setTimeout(function() {
+			removeFunc();
+		}, 300)
+		setTimeout(function() {
+			if(win == false)
+  			{alert("Click OK to begin "+ player1.name+"'s turn");
+  			turn =0;}
+  		},1000)
+			
+	}
+	
+}
+
+//switches turns, calls createtable to make tables from scratch
+function switchPlayer(player)
+{
+  document.getElementById("grid1").innerHTML = "Target's Grid";
+  document.getElementById("score").innerHTML =  player.name + "'s score: " + player.score;
+  createTable('targetsTable', player);
+  document.getElementById("grid2").innerHTML = "Player's Grid";
+  createTable('myTable', player);
+}
+
+//from char to code
+function getNum(c, n)
+{
+	return (c.charCodeAt(0) - n);
+}
+
+//from code to char
+function getStr(c, n)
+{
+	return String.fromCharCode(c + n);
+}
+
+//changes text within a cell
+function changeCellText(r, c, text)
+{
+	var x = document.getElementById('myTable');
+	if (r == '10')
+	{
+		var cell = x.rows[10].cells[getNum(c, 64)].innerHTML = text;;
+	}
+	else
+	{
+	var cell = x.rows[getNum(r, 48)].cells[getNum(c, 64)].innerHTML = text;
+	}
+}
+//changes color within a cell
+function changeCellColor(r, c, color, id)
+{
+	var x = document.getElementById(id);
+	if (r == '10')
+	{
+		var cell = x.rows[10].cells[getNum(c, 64)].style.backgroundColor = color;
+	}
+	else
+	{
+		var cell = x.rows[getNum(r, 48)].cells[getNum(c, 64)].style.backgroundColor = color;
+	}
+}
+
+//sets players ships on the table
+function setShip(player)
+{
+	var a = player.aircraft;
+	
+		for(var i =0; i <a.length; i++)
+		{
+			var r = a[i].charAt(1);
+			var c = a[i].charAt(0);
+			if(a[i].charAt(2)) r= r.concat(a[i].charAt(2));
+			changeCellText(r, c, "A");
+		}
+
+	var b = player.battleship;
+
+		for(var i =0; i <b.length; i++)
+		{
+			var r = b[i].charAt(1);
+			var c = b[i].charAt(0);
+			if(b[i].charAt(2)) r= r.concat(b[i].charAt(2));
+			changeCellText(r, c, "B");
+		}
+	var s = player.submarine;
+		for(var i =0; i <s.length; i++)
+		{
+			var r = s[i].charAt(1);
+			var c = s[i].charAt(0);
+			if(s[i].charAt(2)) r= r.concat(s[i].charAt(2));
+			changeCellText(r, c, "S");
+		}
+}
+
+//A:A1-A5;B:B6-E6;S:H3-J3
+//A(A1-A5); B(B6-E6); S(H3-J3);
+//B(B6-E6);S(H3-J3);A(A1-A5)
+//parses players initial placements and puts it on the players table
+function parsePlacement(player)
+{
+	
+		var p = player.placement;
+		if((!p.match(/^[ABS][(][A-J]([1-9]|10)-[A-J]([1-9]|10)[)];\s?[ABS][(][A-J]([1-9]|10)-[A-J]([1-9]|10)[)];\s?[ABS][(][A-J]([1-9]|10)-[A-J]([1-9]|10)[)];?$/)) && (!p.match(/^[ABS]:[A-J]([1-9]|10)-[A-J]([1-9]|10);\s?[ABS]:[A-J]([1-9]|10)-[A-J]([1-9]|10);\s?[ABS]:[A-J]([1-9]|10)-[A-J]([1-9]|10);?$/)
+			))
+		{
+			player.placement = prompt("Please enter a correct placement");
+			return -1;
+		}
+		p = p.replace(/\s+/g, "");
+
+		var array = p.split(";");
+	
+  	for(var i=0; i <3; i++)
+  	{
+  		var position = array[i].split(/[:()]/g);
+  		var a = position[1].split("-");
+  			var c1 = a[0].charAt(0);
+      		var c2 = a[1].charAt(0);
+      		var r1 = a[0].charAt(1);
+      		var r2 = a[1].charAt(1);
+      		if(a[1].charAt(2))
+      		{
+      			r2 = r2.concat(a[1].charAt(2));
+      		}
+      		if(a[0].charAt(2))
+      		{
+      			r1 = r1.concat(a[0].charAt(2));
+      		}
+  		//if aircraft
+  		if (position[0] == "A")
+  		{
+  			
+      		var index = 0
+      		if(c1 == c2)
+      		{
+      			if((parseInt(r2, 10) - parseInt(r1, 10)) !=4)
+      			{
+      				player.placement = prompt("You have not entered the correct spaces for the aircraft. Please enter a correct placement");
+      				return -1;
+      			}
+      			
+      			for(var j = parseInt(r1, 10); j <= parseInt(r2, 10); j++)
+      			{
+      				var p = c1.concat(j.toString());
+      				player.aircraft[index] = p;
+      				index++
+      				
+      			}
+      			
+      		}
+      		else if (r1==r2)
+      		{   //row is same, increment column number from r1 to r2
+      			if((c2.charCodeAt(0) - c1.charCodeAt(0)) !=4) 
+      			{
+      				player.placement = prompt("You have not entered the correct spaces for the aircraft. Please enter a correct placement");
+      				return -1;
+      			}
+      			for(var j = c1.charCodeAt(0); j <= c2.charCodeAt(0); j++)
+      			{
+      				var p = (String.fromCharCode(j)).concat(r1);
+      				player.aircraft[index] =p;
+      				index++;
+      			}
+      		}
+      		else
+      		{
+      			player.placement = prompt("Please enter a correct placement");
+      			return -1;
+      		}
+  		}
+  		//if battleship
+  		else if (position[0] == "B")
+  		{
+      		var index = 0
+      		if(c1 == c2)
+      		{
+      			//column is same, increment row number from r1 to r2
+      			if((parseInt(r2, 10) - parseInt(r1, 10)) !=3) 
+      			{
+      				player.placement = prompt("You have not entered the correct spaces for the battleship. Please enter a correct placement");
+      				return -1;
+      			}
+      			for(var j = parseInt(r1, 10); j <= parseInt(r2, 10); j++)
+      			{
+      				var p = c1.concat(j.toString());
+      				player.battleship[index] =p;
+      				index++
+      				
+      			}
+      			
+      		}
+      		else if (r1==r2)
+      		{   //row is same, increment column number from r1 to r2
+      			if((c2.charCodeAt(0) - c1.charCodeAt(0)) !=3) 
+      			{
+      				player.placement = prompt("You have not entered the correct spaces for the battleship. Please enter a correct placement");
+      				return -1;
+      			}
+      			for(var j = c1.charCodeAt(0); j <= c2.charCodeAt(0); j++)
+      			{
+      				var p = (String.fromCharCode(j)).concat(r1);
+      				player.battleship[index] =p;
+      				index++;
+      			}
+      		}
+      		else
+      		{
+      			player.placement = prompt("Please enter a correct placement");
+      			return -1;
+      		}
+  		}
+  		//if submarine
+  		else if (position[0] == "S")
+  		{
+      		var index = 0
+      		if(c1 == c2)
+      		{
+      			//column is same, increment row number from r1 to r2
+      			if((parseInt(r2, 10) - parseInt(r1, 10)) !=2) 
+      			{
+      				player.placement = prompt("You have not entered the correct spaces for the submarine. Please enter a correct placement");
+      				return -1;
+      			}
+      			for(var j = parseInt(r1, 10); j <= parseInt(r2, 10); j++)
+      			{
+      				var p = c1.concat(j.toString());
+      				player.submarine[index] =p;
+      				index++
+      				
+      			}
+      			
+      		}
+      		else if (r1==r2)
+      		{   //row is same, increment column number from r1 to r2
+      			if((c2.charCodeAt(0) - c1.charCodeAt(0)) !=2) 
+      			{
+      				player.placement = prompt("You have not entered the correct spaces for the submarine. Please enter a correct placement");
+      				return -1;
+      			}
+      			for(var j = c1.charCodeAt(0); j <= c2.charCodeAt(0); j++)
+      			{
+      				var p = (String.fromCharCode(j)).concat(r1);
+      				player.submarine[index] =p;
+      				index++;
+      			}
+      		}
+      		else
+      		{
+      			player.placement = prompt("Please enter a correct placement");
+      			return -1;
+      		}
+  		}
+  		else
+  		{
+  			player.placement = prompt("Please enter a correct placement");
+  			return -1;
+  		}
+  		
+  	}
+}
+		
+
+//removes tables 
+    function removeTable(id)
+    {
+        var tbl = document.getElementById(id);
+        tbl.innerHTML="";
+        
+    }
+
+//removes everything except headera and highest scores from the screen
+function removeFunc()
+{
+		removeTable('myTable');
+		removeTable('targetsTable');
+		var h1 = document.getElementById("grid1");
+		h1.innerHTML = "";
+		var h2 = document.getElementById("grid2");
+		h2.innerHTML = "";
+		var sc = document.getElementById("score");
+		sc.innerHTML = "";
+}
+
+ 
+//gets score from local storage and displays them
+ function getScores()
+ {
+ 	if(!localStorage.getItem('highScores'))
+ 	{
+ 		document.getElementById("highscores").innerHTML = "No Highest scores yet";
+ 	}
+ 	else
+ 	{
+ 		var retrieved = localStorage.getItem('highScores');
+ 		scoreDict = JSON.parse(retrieved);
+		var items = [];
+		for (var name in scoreDict)
+		{
+			var n = [name, scoreDict[name]];
+			items.push(n);
+		}
+
+		// Sort the array based on the second element
+		items.sort(function(first, second) {
+  			return second[1] - first[1];
+		});
+ 		var str = "";
+ 		for(var i =0; i <items.length; i++)
+ 		{
+ 			var name = items[i][0];
+ 			var score = items[i][1] ;
+ 			name = name.concat(":");
+ 			name = name.concat(score.toString());
+ 			str = str.concat(name);
+ 			str = str.concat("  ");
+ 		}
+		
+		document.getElementById("highscores").innerHTML= "Top 10 Scores: "+ str;
+ 	}
+ }
+
+ //sets new scores in local storage
+ function setScores(player)
+ {
+ 	if(!localStorage.getItem('highScores'))
+ 	{
+ 		//create new dict obj with names and scores
+ 		var scoreDict = {};
+ 		scoreDict[player.name] = player.score;
+ 		localStorage.setItem('highScores', JSON.stringify(scoreDict));
+
+ 	}
+ 	else
+ 	{
+ 		var retrieved= localStorage.getItem('highScores');
+ 		scoreDict = JSON.parse(retrieved);
+ 		var array = new Array();
+ 		for(var name in scoreDict)
+ 		{
+ 			array.push(scoreDict[name]);
+ 		}
+ 		array.sort();
+ 		//(a, b) => a - b
+ 		if (array.length == 10)
+ 		{
+ 			if(player.score > array[0])
+ 			{
+ 					for(var key in scoreDict)
+ 					{
+ 						if (scoreDict[key] == array[0])
+ 							{
+ 								delete scoreDict[key];
+ 								scoreDict[player.name] = player.score;
+ 								break;
+ 							}
+
+ 					}
+ 			}
+ 		}
+ 		else if (array.length < 10)
+ 		{
+ 			scoreDict[player.name] = player.score;
+ 		}
+ 		localStorage.setItem('highScores', JSON.stringify(scoreDict));
+ 		
+ 	}
+ 	
+ 	
+ 	
+ }
+
+//game loop
+ function loop() {
+ 	if (player1.score == 0)
+ 	{
+ 		alert(player2.name +" wins with a score of "+ player2.score);
+ 		removeFunc();
+ 		setScores(player2);
+ 		win = true;
+ 		return 0;
+ 	}
+ 	else if (player2.score == 0)
+ 	{
+ 		alert(player1.name +" wins with a score of "+ player1.score);
+ 		removeFunc();
+ 		setScores(player1);
+ 		win = true;
+ 		return 0;
+ 	}
+ 	if (turn == 0)
+ 	{
+ 		switchPlayer(player1);
+ 		setShip(player1);
+ 		turn = 1;
+ 	}
+ 	else if(turn == 3)
+ 	{
+ 		switchPlayer(player2);
+ 		setShip(player2);
+ 		turn = 2;
+ 	}
+ 	
+ 	
+    setTimeout(loop, 1000 / 60);
+}
+
+
+ player1.name = prompt("Please enter player 1's name?");
+ player1.placement = prompt("Please enter player 1's ship placements");
+ var res = parsePlacement(player1);
+ while (res == -1)
+ {
+ 	res = parsePlacement(player1);
+ }
+
+ player2.name = prompt("Please enter player 2's name?");
+ player2.placement = prompt("Please enter player2's ship placements"); 
+ res = parsePlacement(player2);
+ while ( res == -1)
+ {
+ 	res = parsePlacement(player2);
+ }
+
+
+var turn = 0;
+var win = false;
+
+alert(" Click OK to begin "+ player1.name+"'s turn");
+getScores();
+loop();
+
+</script>
+</body>
