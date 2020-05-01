@@ -1,15 +1,15 @@
-*BattleShip*  
+# BattleShip #  
 
-##Overview
+## Overview
 
 BattleShip is an interactive web application made using HTML5, CSS3, JavaScript and, the DOM.
 This game assumes that only one user is viewing the page that presents the game at a time (e.g., the two players are using a laptop that they pass back and forth between turns). Details of the game can be found [here] (https://en.wikipedia.org/wiki/Battleship_(game)). The game consists of 2 10x10 grids, with rows labeled 1-10 and columns labeled A-J. The players will place 3 game pieces: an aircraft carrier (5 spaces long), a battleship (4 spaces long), and a submarine (3 spaces long). These pieces can be placed either horizontally or vertically.  
 
-##How to run
+## How to run
 
 Open the html file in Google Chrome to start playing the game.  
 
-##How to play
+## How to play
 
 When the page is loaded, the game begins by asking the first player for their name and a string representing their ship placements.  
 The game only accepts 3 different formats for ship placements. For example: the game accepts *only* the strings of the following forms as equivalent, with each resulting in an aircraft carrier placed on A1, A2, A3, A4, A5; a battleship at B6, C6, D6, E6; and a submarine at H3, I3, J3:  
